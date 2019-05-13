@@ -10,7 +10,10 @@ function clone (stateObject) {
 
 const initState = {
     dosage : 0,
-    halfLife : 0
+    dosageValid : false,
+    halfLife : 0,
+    halfLifeValid : false,
+    numDays: 20
 }
 
 export function drugSteadyStateReducer (state, action) {
@@ -21,10 +24,25 @@ export function drugSteadyStateReducer (state, action) {
     newState = clone(state);
     switch(action.type) {
         case "HALF_LIFE_UPDATE":
-            newState.halfLife = action.value;
+            if (isNaN(action.value) || action.value < 0) {
+                newState.halfLifeValid = false;
+                
+            } else {
+                newState.halfLifeValid = true;
+                newState.halfLife = action.value;
+            }
             break;
         case "DOSAGE_UPDATE":
-            newState.dosage = action.value;
+            if (isNaN(action.value) || action.value < 0) {
+                newState.dosageValid = false;
+                
+            } else {
+                newState.dosageValid = true;
+                newState.dosage = action.value;
+            }
+            break;
+        case "NUMDAYS_UPDATE":
+            newState.numDays = action.value;
             break;
         default:
             break;

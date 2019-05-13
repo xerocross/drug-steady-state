@@ -1,7 +1,7 @@
 import React, {Component}  from 'react';
 import { createStore } from 'redux'
 import './DrugSteadyState.css';
-import {getHalfLifeUpdate, getDosageUpdate} from "./actions";
+import {getHalfLifeUpdate, getDosageUpdate, getNumDaysUpdate} from "./actions";
 import { drugSteadyStateReducer} from "./reducers";
 
 class  DrugSteadyState extends Component {
@@ -18,19 +18,26 @@ class  DrugSteadyState extends Component {
             this.setState(()=> {return {
                 dosage: state.dosage,
                 halfLife : state.halfLife,
-                rate : rate
+                halfLifeValid : state.halfLifeValid,
+                dosageValid : state.dosageValid,
+                rate : rate,
+                numDays : state.numDays
             }});
         });
         this.state = {
             dosage: 0,
             halfLife : 0,
             rate : 0,
-            numDays : 20
+            halfLifeValid : false,
+            numDays : 20,
+            threshhold : 0.05,
+            dosageValid : false
         }
 
         this.handleHalfLifeChange = this.handleHalfLifeChange.bind(this);
         this.handleDosageChange = this.handleDosageChange.bind(this);
         this.getRate = this.getRate.bind(this);
+        this.increaseNumDays = this.increaseNumDays.bind(this);
         this.getDailyConcentrations = this.getDailyConcentrations.bind(this);
     }
 
@@ -58,19 +65,23 @@ class  DrugSteadyState extends Component {
     }
 
     getDailyConcentrations (state) {
-        const numDays = 48;
         let arr = [];
-        for (let i = 0; i < numDays; i++) {
+        for (let i = 0; i < state.numDays; i++) {
             arr.push(this.getStartBloodConcentration(state, i));
         }
         return arr;
+    }
+
+    increaseNumDays (state) {
+        let numDays = state.numDays + 10;
+        this.store.dispatch(getNumDaysUpdate(numDays));
     }
 
     render () { 
         return (
             <div className="DrugSteadyState">
                 <p className = "info"> 
-                    This app is for information purposes only.
+                    This widget is for information purposes only.
                 </p>
                 <p className = "info">
                     You can typically find the elimination half-life of a drug 
@@ -95,35 +106,53 @@ class  DrugSteadyState extends Component {
                         />
                     </div>
                 </form>
-                <p className = "info">
-                    So the individual is taking <strong>{this.state.dosage} mg</strong> of a drug
-                    having an elimination half-life of <strong>{this.state.halfLife} hours</strong>.
-                </p>
-                <p>
-                    Below we see approximate total blood content of the drug remaining 
-                    at the beginning of each day, immediately after taking that day's dose 
-                    of the drug.
-                </p>
-                <div className = "blood-levels-outer">
-                    <table className="table table-striped blood-levels">
-                        <thead>
-                            <tr>
-                                <th scope="col">Day</th>
-                                <th scope="col">Blood level</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {this.getDailyConcentrations(this.state).map(function(val, index){
-                                return (
-                                    <tr key={ index }>
-                                        <th scope="row">{index}</th>
-                                        <td>{val}</td>
+
+                { this.state.halfLifeValid && this.state.dosageValid &&
+                    <div>
+                        <p className = "info">
+                            So the individual is taking <strong>{this.state.dosage} mg</strong> of a drug
+                            having an elimination half-life of <strong>{this.state.halfLife} hours</strong>.
+                        </p>
+                        <p className = "info">
+                            Below we see approximate total blood content of the drug remaining 
+                            at the beginning of each day, immediately after taking that day's dose 
+                            of the drug.
+                        </p>
+                        <p className = "info">
+                            Typically it takes only a few days for the numbers to level out, 
+                            after which you see only small daily changes.
+                        </p>
+                        <h2>Daily Blood Levels</h2>
+                        <div className = "blood-levels-outer">
+                            <table className="table table-striped blood-levels">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Day</th>
+                                        <th scope="col">Blood level</th>
                                     </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
-                </div>
+                                </thead>
+                                <tbody>
+                                    {this.getDailyConcentrations(this.state).map(function(val, index){
+                                        return (
+                                            <tr key={ index }>
+                                                <th scope="row">{index}</th>
+                                                <td>{val.toFixed(3)}</td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div className = "text-center more-button-div center">
+                            <button 
+                                className = "btn btn-default more-button"
+                                onClick = {()=> this.increaseNumDays(this.state)}
+                            >
+                                compute more days
+                            </button>
+                        </div>
+                    </div>
+                }
             </div>
         );
     }

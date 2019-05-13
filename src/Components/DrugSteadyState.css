@@ -1,0 +1,8 @@
+.DrugSteadyState {
+    text-align: left;
+}
+
+.blood-levels-outer {
+    height: 300px;
+    overflow-y : scroll;
+}

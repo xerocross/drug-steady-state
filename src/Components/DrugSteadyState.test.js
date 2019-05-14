@@ -11,6 +11,7 @@ let getByText;
 let getByTestId;
 let container;
 let queryAllByTestId;
+let computeMoreDaysButton;
 afterEach(cleanup)
 
 beforeEach(()=>{
@@ -21,6 +22,7 @@ beforeEach(()=>{
     queryAllByTestId = res.queryAllByTestId;
     dosageInput = getByTestId("dosage-input");
     halfLifeInput = getByTestId("half-life-input");
+    computeMoreDaysButton = queryByTestId("more-days-button");
     drugLevelsTableOuter = queryByTestId("drug-level-table-outer");
 })
 
@@ -57,10 +59,29 @@ test("resetting dosage invalid hides drug levels", ()=> {
     expect(drugLevelsTableOuter).toBeNull();
 });
 
+test("resetting halflife invalid hides drug levels", ()=> {
+    fireEvent.change(dosageInput, { target: { value: 5 }});
+    fireEvent.change(halfLifeInput, { target: { value: 5 }});
+    drugLevelsTableOuter = queryByTestId("drug-level-table-outer");
+    expect(drugLevelsTableOuter).not.toBeNull();
+    fireEvent.change(halfLifeInput, { target: { value: NaN }});
+    drugLevelsTableOuter = queryByTestId("drug-level-table-outer");
+    expect(drugLevelsTableOuter).toBeNull();
+});
+
 test("after setting dosage and halflife, expect 20 days initially", ()=> {
     fireEvent.change(dosageInput, { target: { value: 5 }});
     fireEvent.change(halfLifeInput, { target: { value: 5 }});
     drugLevelsTableOuter = queryByTestId("drug-level-table-outer");
     let drugLevelDays = queryAllByTestId("drug-level-on-day");
     expect(drugLevelDays.length).toBe(20);
+});
+
+test("after pushing 'compute more days' button, shows 30 days", ()=> {
+    fireEvent.change(dosageInput, { target: { value: 5 }});
+    fireEvent.change(halfLifeInput, { target: { value: 5 }});
+    computeMoreDaysButton = queryByTestId("more-days-button");
+    fireEvent.click(computeMoreDaysButton);
+    let drugLevelDays = queryAllByTestId("drug-level-on-day");
+    expect(drugLevelDays.length).toBe(30);
 });

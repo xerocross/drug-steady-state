@@ -56,7 +56,7 @@ class  DrugSteadyState extends Component {
                     <div className = {"form-group"}>
                         <label>Drug Half Life (in hours)</label>
                         <input 
-                            className = {"form-control half-life-input " + (this.state.halfLifeDirty && !this.state.halfLifeValid ? 'is-invalid' : '')} 
+                            className = {"form-control half-life-input " + (this.state.halfLifeDirty && !this.state.halfLifeValid ? 'has-error' : '')} 
                             data-testid="half-life-input"
                             type="number" 
                             onChange = {this.handleHalfLifeChange} 
@@ -64,7 +64,7 @@ class  DrugSteadyState extends Component {
                         />
                         <label>Dosage per day (in milligrams)</label>
                         <input 
-                            className = {"form-control dosage-input " + (this.state.dosageDirty && !this.state.dosageValid ? 'is-invalid' : "")}
+                            className = {"form-control dosage-input " + (this.state.dosageDirty && !this.state.dosageValid ? 'has-error' : "")}
                             data-testid="dosage-input"
                             type="number" 
                             onChange = {this.handleDosageChange} 

@@ -49,7 +49,7 @@ class  DrugSteadyState extends Component {
                 </p>
                 <p className = "info">
                     You can typically find the elimination half-life of a drug 
-                    in references such as Wikipedia.  If they give a rage instead 
+                    in references such as Wikipedia.  If they give a range instead 
                     of a specific number, just choose something in the middle.
                 </p>
                 <form>

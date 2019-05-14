@@ -8,13 +8,22 @@ function clone (stateObject) {
     // and that is exactly what we want
 }
 
-const initState = {
-    dosage : 0,
-    dosageValid : false,
+// const initState = {
+//     dosage : 0,
+//     dosageValid : false,
+//     halfLife : 0,
+//     halfLifeValid : false,
+//     numDays: 20
+// }
+
+export const initState = {
+    dosage: 0,
     halfLife : 0,
     halfLifeValid : false,
-    numDays: 20
-}
+    numDays : 20,
+    threshhold : 0.05,
+    dosageValid : false
+};
 
 export function drugSteadyStateReducer (state, action) {
     let newState;

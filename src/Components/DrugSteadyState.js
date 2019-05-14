@@ -2,74 +2,36 @@ import React, {Component}  from 'react';
 import { createStore } from 'redux'
 import './DrugSteadyState.css';
 import {getHalfLifeUpdate, getDosageUpdate, getNumDaysUpdate} from "./actions";
-import { drugSteadyStateReducer} from "./reducers";
+import { drugSteadyStateReducer, initState } from "./reducers";
+import BloodLevels from "../Helpers/blood-levels";
+
 
 class  DrugSteadyState extends Component {
-    
-
     constructor() {
         super();
         this.store = createStore(drugSteadyStateReducer);
         this.store.subscribe(() => {
             let state = this.store.getState();
-            console.log(state);
-            let rate = this.getRate(state.halfLife);
-            console.log("rate " + rate);
             this.setState(()=> {return {
-                dosage: state.dosage,
                 halfLife : state.halfLife,
                 halfLifeValid : state.halfLifeValid,
+                dosage: state.dosage,
                 dosageValid : state.dosageValid,
-                rate : rate,
                 numDays : state.numDays
             }});
         });
-        this.state = {
-            dosage: 0,
-            halfLife : 0,
-            rate : 0,
-            halfLifeValid : false,
-            numDays : 20,
-            threshhold : 0.05,
-            dosageValid : false
-        }
-
+        this.state = initState;
         this.handleHalfLifeChange = this.handleHalfLifeChange.bind(this);
         this.handleDosageChange = this.handleDosageChange.bind(this);
-        this.getRate = this.getRate.bind(this);
         this.increaseNumDays = this.increaseNumDays.bind(this);
-        this.getDailyConcentrations = this.getDailyConcentrations.bind(this);
     }
 
     handleHalfLifeChange (event) {
-        console.log("half-life: " + event.target.value);
         this.store.dispatch(getHalfLifeUpdate(parseFloat(event.target.value)));
     }
 
     handleDosageChange (event) {
-        console.log("dosage: " + event.target.value);
         this.store.dispatch(getDosageUpdate(parseFloat(event.target.value)));
-    }
-
-    getRate (halfLife) {
-        return -Math.log(2)/halfLife;
-    }
-
-    getStartBloodConcentration (state, day) {
-        const dayMultiplier = Math.exp(24*state.rate);
-        let sum = 0;
-        for (let i = 0; i <= day; i++) {
-            sum += state.dosage*((dayMultiplier)**i);
-        }
-        return sum;
-    }
-
-    getDailyConcentrations (state) {
-        let arr = [];
-        for (let i = 0; i < state.numDays; i++) {
-            arr.push(this.getStartBloodConcentration(state, i));
-        }
-        return arr;
     }
 
     increaseNumDays (state) {
@@ -92,14 +54,16 @@ class  DrugSteadyState extends Component {
                     <div className = {"form-group"}>
                         <label>Drug Half Life (in hours)</label>
                         <input 
-                            className = {"form-control"} 
+                            className = {"form-control half-life-input"} 
+                            data-testid="half-life-input"
                             type="number" 
                             onChange = {this.handleHalfLifeChange} 
                             required
                         />
                         <label>Dosage per day (in milligrams)</label>
                         <input 
-                            className = {"form-control"} 
+                            className = {"form-control dosage-input"}
+                            data-testid="dosage-input"
                             type="number" 
                             onChange = {this.handleDosageChange} 
                             required
@@ -108,7 +72,10 @@ class  DrugSteadyState extends Component {
                 </form>
 
                 { this.state.halfLifeValid && this.state.dosageValid &&
-                    <div>
+                    <div 
+                        className = "drug-level-table-outer"
+                        data-testid = "drug-level-table-outer"
+                    >
                         <p className = "info">
                             So the individual is taking <strong>{this.state.dosage} mg</strong> of a drug
                             having an elimination half-life of <strong>{this.state.halfLife} hours</strong>.
@@ -120,7 +87,8 @@ class  DrugSteadyState extends Component {
                         </p>
                         <p className = "info">
                             Typically it takes only a few days for the numbers to level out, 
-                            after which you see only small daily changes.
+                            after which you see only small daily changes.  For longer half-life 
+                            it will take longer to reach a steady state.
                         </p>
                         <h2>Daily Blood Levels</h2>
                         <div className = "blood-levels-outer">
@@ -132,9 +100,11 @@ class  DrugSteadyState extends Component {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {this.getDailyConcentrations(this.state).map(function(val, index){
+                                    { BloodLevels.getDailyDrugBloodLevel(this.state).map(function(val, index){
                                         return (
-                                            <tr key={ index }>
+                                            <tr key={ index }
+                                                data-testid = "drug-level-on-day"
+                                            >
                                                 <th scope="row">{index}</th>
                                                 <td>{val.toFixed(3)}</td>
                                             </tr>

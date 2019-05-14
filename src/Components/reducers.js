@@ -20,9 +20,11 @@ export const initState = {
     dosage: 0,
     halfLife : 0,
     halfLifeValid : false,
+    halfLifeDirty : false,
     numDays : 20,
     threshhold : 0.05,
-    dosageValid : false
+    dosageValid : false,
+    dosageDirty : false
 };
 
 export function drugSteadyStateReducer (state, action) {
@@ -33,15 +35,18 @@ export function drugSteadyStateReducer (state, action) {
     newState = clone(state);
     switch(action.type) {
         case "HALF_LIFE_UPDATE":
+            newState.halfLifeDirty = true;
             if (isNaN(action.value) || action.value < 0) {
                 newState.halfLifeValid = false;
                 
             } else {
                 newState.halfLifeValid = true;
                 newState.halfLife = action.value;
+                
             }
             break;
         case "DOSAGE_UPDATE":
+            newState.dosageDirty = true;
             if (isNaN(action.value) || action.value < 0) {
                 newState.dosageValid = false;
                 

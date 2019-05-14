@@ -117,7 +117,7 @@ class  DrugSteadyState extends Component {
                         </div>
                         <div className = "text-center more-button-div center">
                             <button 
-                                className = "btn btn-default more-button"
+                                className = "btn btn-secondary more-button"
                                 data-testid = "more-days-button"
                                 onClick = {()=> this.increaseNumDays(this.state)}
                             >
